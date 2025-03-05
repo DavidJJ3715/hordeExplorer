@@ -7,7 +7,7 @@ ICBoost = -IC:/Users/david/Downloads/Code/boost_1_86_0
 LCSDL = -LC:\Users\david\Downloads\Code\SDL2\lib
 
 main: $(dependencies)
-	g++ $(errflags) main.cpp -o ClickerClone $(ICSDL) $(LCSDL) $(linkedLibraries)
+	g++ $(errflags) main.cpp -o hordeExplorer $(ICSDL) $(LCSDL) $(linkedLibraries)
 	./hordeExplorer.exe
 	python key.py
 
@@ -20,9 +20,9 @@ noRun: $(dependencies)
 
 ClickerClone: $(dependencies)
 	g++ $(errflags) -static main.cpp -o hordeExplorer $(shareLinkedLibraries)
-	powershell Remove-Item C:\Users\david\Downloads\Code\Exports\hordeExplorer\horderExplorer.exe
+	powershell Remove-Item C:\Users\david\Downloads\Code\Exports\hordeExplorer\hordeExplorer.exe
 	powershell move ClickerClone.exe C:\Users\david\Downloads\Code\Exports\hordeExplorer
 	powershell Remove-Item C:\Users\david\Downloads\Code\Exports\hordeExplorer.zip
-	powershell Compress-Archive C:\Users\david\Downloads\Code\Exports\horderExplorer C:\Users\david\Downloads\Code\Exports\hordeExplorer.zip
+	powershell Compress-Archive C:\Users\david\Downloads\Code\Exports\hordeExplorer C:\Users\david\Downloads\Code\Exports\hordeExplorer.zip
 	powershell make noRun
 	python key.py
