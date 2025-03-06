@@ -1,4 +1,6 @@
 #include "func.h"
+#include "player.h"
+#include "enemy.h"
 
 int main() {
     SDL_Init(SDL_INIT_EVERYTHING);
