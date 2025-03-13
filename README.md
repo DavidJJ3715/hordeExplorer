@@ -1,4 +1,4 @@
-## Tools used to create project:
+## Tools used to create project
 - **Piskel Sprite Editor**  
   → [Piskel](https://www.piskelapp.com/)  
 - **Sprite Sheet Maker**  
