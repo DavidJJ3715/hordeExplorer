@@ -27,6 +27,10 @@
 *       Global Variables        *
 *********************************/
 const int WIDTH = 1200, HEIGHT = 800, frameDelay = 10;
+std::unordered_map<std::string, SDL_Rect> sprites = 
+    {
+        {"dirt",{1,1,30,30}}
+    };
 
 /********************************
 *       Core Functionality      *
@@ -35,6 +39,15 @@ const int WIDTH = 1200, HEIGHT = 800, frameDelay = 10;
 /********************************
 *       Draw Functions          *
 *********************************/
+void drawRoom(SDL_Renderer* renderer, SDL_Texture* atlas, std::string floor, std::string wall) {
+    for(int i=0; i<24; ++i) {
+        for(int j=0; j<16; ++j) {
+            SDL_Rect temp = {240+(i*30), 140+(j*30), 30, 30};
+            SDL_RenderCopy(renderer, atlas, &sprites[floor], &temp);
+        }
+    }
+}
+
 void drawStart(SDL_Renderer* renderer, TTF_Font* font, bool selection) {
     // Placeholder code so I have a start menu
     SDL_SetRenderDrawColor(renderer,255,255,255,0);

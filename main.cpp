@@ -14,6 +14,7 @@ int main() {
     int frameTime = 0, xPos = WIDTH/2, yPos = HEIGHT/2;
     Uint64 frameStart = 0;
     bool running = true, beginning = true;
+    SDL_Texture* atlas = IMG_LoadTexture(renderer, "Atlas.png");
 
     while(running) {
         frameStart = SDL_GetTicks64();
@@ -40,9 +41,11 @@ int main() {
                     break;
             }
         }
-
         SDL_SetRenderDrawColor(renderer,0,0,0,0);
         SDL_RenderClear(renderer);
+
+        drawRoom(renderer, atlas, "dirt", "");
+
         SDL_RenderPresent(renderer);
         frameTime = SDL_GetTicks64() - frameStart;
         if(frameDelay > frameTime) {
@@ -50,6 +53,7 @@ int main() {
         }
     }
 
+    SDL_DestroyTexture(atlas);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     TTF_CloseFont(font);
