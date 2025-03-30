@@ -1,5 +1,7 @@
 ## Tools used to create project
 - **SDL2**  
-  → [SDL2](https://www.libsdl.org/)  
+  → [SDL2](https://www.libsdl.org/)
 - **Piskel Sprite Editor**  
-  → [Piskel](https://www.piskelapp.com/)   
+  → [Piskel](https://www.piskelapp.com/)
+- **Image Color Picker**  
+  → [ColorPicker](https://imagecolorpicker.com/)
