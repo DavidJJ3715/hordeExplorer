@@ -10,16 +10,26 @@ int main() {
     SDL_Window* window = SDL_CreateWindow("Horde Explorer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, WIDTH, HEIGHT, SDL_WINDOW_SHOWN);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
     TTF_Font* font = TTF_OpenFont("DejaVuSans.ttf", 75);
+    std::optional<SDL_KeyCode> postUpdate;
+    
+    std::vector<std::shared_ptr<enemy>> enemyList;
+    for(int i=0; i<3; ++i) {
+        enemyList.emplace_back(std::make_shared<enemy>(enemyList));
+    }
+    std::shared_ptr<player> user(new player());
 
     int frameTime = 0, xPos = WIDTH/2, yPos = HEIGHT/2;
     Uint64 frameStart = 0;
-    bool running = true, beginning = true;
+    bool running = true, beginning = true, gameOver = false;
     SDL_Texture* atlas = IMG_LoadTexture(renderer, "Atlas.png");
 
-    while(running) {
+    while(!user->isDead()) {
         frameStart = SDL_GetTicks64();
         if(beginning) {
             running = selectionMenu(renderer, font, drawStart);
+            user->restart();
+            if(!running) 
+                {user->killUser();}
             beginning = false;
         }
 
@@ -29,27 +39,37 @@ int main() {
             yPos = event.motion.y;
             switch(event.type) {
                 case SDL_QUIT:
+                    user->killUser();
                     running = false; break;
-                case SDL_KEYDOWN:
-                    if(event.key.keysym.sym == SDLK_ESCAPE) {
-                        if(!selectionMenu(renderer, font, drawPause)) {
-                            beginning = true; break;
-                        }
+                default:
+                    postUpdate = user->update(event);
+                    if(!postUpdate.has_value())
+                        {break;}
+                    else if(postUpdate.value() == SDLK_ESCAPE) {
+                        if(!selectionMenu(renderer, font, drawPause))
+                            {beginning = true; break;}
                     }
-                    break;
-                case SDL_MOUSEBUTTONDOWN:
-                    break;
             }
         }
         SDL_SetRenderDrawColor(renderer,0,0,0,0);
         SDL_RenderClear(renderer);
 
         drawRoom(renderer, atlas, "dirt", "");
+        user->draw(renderer);
+        gameOver = updateDrawEnemy(renderer, enemyList, user);
 
         SDL_RenderPresent(renderer);
         frameTime = SDL_GetTicks64() - frameStart;
         if(frameDelay > frameTime) {
             SDL_Delay(frameDelay - frameTime);
+        }
+        if(gameOver) {
+            if(!selectionMenu(renderer, font, drawGameOver))
+                {running = false;}
+            else {
+                beginning = true;
+                user->revive();
+            }
         }
     }
 

@@ -35,10 +35,77 @@ std::unordered_map<std::string, SDL_Rect> sprites =
 /********************************
 *       Core Functionality      *
 *********************************/
+template<typename enemyType, typename userType>
+bool updateDrawEnemy(SDL_Renderer* renderer, std::vector<std::shared_ptr<enemyType>>& enemyList, std::shared_ptr<userType>& player)
+{
+    bool gameOver = false;
+    for(auto en = enemyList.begin(); en != enemyList.end(); ++en)
+    {
+        (*en)->update();
+        if(!(*en)->isItAlive())
+        {
+            en = enemyList.erase(en);
+            --en;
+            player->damage();
+            if(player->isDead())
+                {gameOver = true;}
+        }
+        else
+            {(*en)->draw(renderer);}
+    }
+    return gameOver;
+}
 
 /********************************
 *       Draw Functions          *
 *********************************/
+void drawGameOver(SDL_Renderer* renderer, TTF_Font* font, bool selection) {
+    SDL_SetRenderDrawColor(renderer,255,255,255,0);
+    SDL_RenderClear(renderer);
+
+    int menuWidth = (WIDTH/2), menuHeight = 2*(HEIGHT/3); //Bounds of the black box
+    int menuX = (WIDTH - menuWidth)/2, menuY = (HEIGHT - menuHeight)/2; //Starting points of the black box
+    int widthVal = (WIDTH/2)-145, heightVal = -1;
+    SDL_Rect rect = {menuX, menuY, menuWidth, menuHeight}, border; //Black rectangle rect
+
+    SDL_SetRenderDrawColor(renderer,0,0,0,0); //Choose black color
+    SDL_RenderFillRect(renderer, &rect); //Fill in black rectangle
+
+    SDL_Surface* surface = TTF_RenderText_Solid(font, "GAME OVER", {255,255,255,0}); //Game pause text
+    SDL_Texture* pauseText = SDL_CreateTextureFromSurface(renderer, surface); //Make it a texture
+    SDL_FreeSurface(surface); //Free the surface to prevent memory leaks
+    surface = TTF_RenderText_Solid(font, "RESTART", {255,255,255,0}); //Resume text
+    SDL_Texture* resumeText = SDL_CreateTextureFromSurface(renderer, surface); //Make it a texture
+    SDL_FreeSurface(surface); //Free the surface to prevent memory leaks
+    surface = TTF_RenderText_Solid(font, "QUIT", {255,255,255,0}); //Quit text
+    SDL_Texture* quitText = SDL_CreateTextureFromSurface(renderer, surface); //Make it a texture
+    SDL_FreeSurface(surface); //Free the surface to prevent memory leaks
+
+    SDL_Rect pause = {(WIDTH/2)-200, (HEIGHT/2)-(menuHeight/2)+25, 400, 140}; //Location of "GAME PAUSED"
+    SDL_Rect resume = {(WIDTH/2)-100, (HEIGHT/2)-50, 200, 100}; //Location of "RESUME"
+    SDL_Rect quit = {(WIDTH/2)-100, (HEIGHT/2)+100, 200, 100}; //Location of "QUIT"
+    SDL_RenderCopy(renderer, pauseText, nullptr, &pause); //Render "GAME PAUSED" to the screen
+    SDL_RenderCopy(renderer, resumeText, nullptr, &resume); //Render "RESUME" to the screen
+    SDL_RenderCopy(renderer, quitText, nullptr, &quit); //Render "QUIT" to the screen
+
+    if(selection) //Change where border is located based on which choice is selected
+        {heightVal = (HEIGHT/2)-50;} //Resume
+    else
+        {heightVal = (HEIGHT/2)+100;} //Quit
+
+    SDL_SetRenderDrawColor(renderer,212,175,55,0); //Gold color for border
+    for(int i=0; i<5; i++)
+    {
+        border = {widthVal+i, heightVal+i, 300-2*i, 100-2*i};
+        SDL_RenderDrawRect(renderer, &border); //Draw the golden rectangle
+    }
+
+    SDL_RenderPresent(renderer); //Draw everything to the screen
+    SDL_DestroyTexture(pauseText); //Destroy every texture to prevent memory leaks
+    SDL_DestroyTexture(resumeText);
+    SDL_DestroyTexture(quitText);   
+}
+
 void drawRoom(SDL_Renderer* renderer, SDL_Texture* atlas, std::string floor, std::string wall) {
     for(int i=0; i<24; ++i) {
         for(int j=0; j<16; ++j) {
