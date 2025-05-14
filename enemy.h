@@ -7,11 +7,13 @@ class enemy { // Object used to generate enemies
         double top(), bottom(), left(), right();
         bool damage(std::string), isItAlive();
         void draw(SDL_Renderer*), update(double,double,const std::vector<std::shared_ptr<enemy>>&);
+        void updateParticles();
         std::string element;
 
     private:
         double xCoord, yCoord, health=100, velocity=10;
-        bool isAlive = true;
+        bool isAlive = true, hasExploded = false;
+        std::vector<Particle> particles;
 };
 
 enemy::enemy(std::vector<std::shared_ptr<enemy>> enemyList) {
@@ -31,15 +33,53 @@ double enemy::right()   {return xCoord+30;}
 bool enemy::isItAlive() {return isAlive;}
 bool enemy::damage(std::string type) {
     health -= 10;
-    if(health <= 0)     {return true;}  //Enemy is dead
-    else                {return false;} //Enemy is not dead
+    if(health <= 0 && !hasExploded) { //Enemy is dead, explode into cool particles
+        std::random_device rd;
+        std::mt19937 gen(rd());
+        std::uniform_real_distribution<double> angle(0,2*M_PI);
+        std::uniform_real_distribution<double> speed(2,5);
+
+        for(int i=0; i<20; ++i) {
+            double ang = angle(gen);
+            double spd = speed(gen);
+
+            particles.push_back({xCoord+15, yCoord+15, std::cos(ang)*spd, std::sin(ang)*spd, 255});
+        }
+        hasExploded = true;
+        isAlive = false;
+        return true;
+    } 
+    return false; //Enemy is not dead
+}
+
+void enemy::updateParticles() {
+    for (auto& p : particles) {
+        p.x += p.velX;
+        p.y += p.velY;
+        if (p.alpha > 5)
+            {p.alpha -= 1;}
+        else 
+            {p.alpha = 0;}
+    }
+
+    // Optional: remove fully faded particles (or keep them till level ends)
+    particles.erase(std::remove_if(particles.begin(), particles.end(),
+        [](const Particle& p) {return p.alpha == 0;}), particles.end());
 }
 
 void enemy::draw(SDL_Renderer* renderer) {
-    Uint8 colorValue = static_cast<Uint8>(40 + (health / 100.0) * 150); //Health visual. Thanks ChatGPT
-    SDL_Rect location = {int(xCoord), int(yCoord), 30, 30};
-    SDL_SetRenderDrawColor(renderer,colorValue,190,170,255);
-    SDL_RenderFillRect(renderer, &location);
+    if(isAlive) {
+        Uint8 colorValue = static_cast<Uint8>(40 + (health / 100.0) * 150); //Health visual. Thanks ChatGPT
+        SDL_Rect location = {int(xCoord), int(yCoord), 30, 30};
+        SDL_SetRenderDrawColor(renderer,colorValue,190,170,255);
+        SDL_RenderFillRect(renderer, &location);
+    }
+    for(auto& p : particles) {
+        SDL_SetRenderDrawColor(renderer, 255, 100, 50, p.alpha);
+        SDL_Rect particleRect = {int(p.x), int(p.y), 3, 3};
+        SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+        SDL_RenderFillRect(renderer, &particleRect);
+    }
 }
 
 void enemy::update(double userX, double userY, const std::vector<std::shared_ptr<enemy>>& enemyList) {

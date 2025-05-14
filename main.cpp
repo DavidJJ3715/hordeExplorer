@@ -18,7 +18,7 @@ int main() {
     }
     std::shared_ptr<player> user(new player(renderer));
 
-    int frameTime = 0, xPos = WIDTH/2, yPos = HEIGHT/2;
+    int frameTime = 0, xPos = WIDTH/2, yPos = HEIGHT/2, level = 1;
     Uint64 frameStart = 0;
     bool running = true, beginning = true, gameOver = false;
     SDL_Texture* atlas = IMG_LoadTexture(renderer, "Atlas.png");
@@ -65,6 +65,9 @@ int main() {
         user->draw(renderer);
         user->drawProjectiles(renderer);
         gameOver = updateDrawEnemy(renderer, enemyList, user);
+        for(auto& e : enemyList) {
+            e->updateParticles();
+        }
 
         SDL_RenderPresent(renderer);
         frameTime = SDL_GetTicks64() - frameStart;

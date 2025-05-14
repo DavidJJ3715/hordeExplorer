@@ -37,6 +37,12 @@ struct Projectile {
   double speed = 5.0;  
 };
 
+struct Particle {
+    double x,y;
+    double velX, velY;
+    Uint8 alpha;
+};
+
 /********************************
 *       Core Functionality      *
 *********************************/
