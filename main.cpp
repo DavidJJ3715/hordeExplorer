@@ -16,7 +16,7 @@ int main() {
     for(int i=0; i<3; ++i) {
         enemyList.emplace_back(std::make_shared<enemy>(enemyList));
     }
-    std::shared_ptr<player> user(new player());
+    std::shared_ptr<player> user(new player(renderer));
 
     int frameTime = 0, xPos = WIDTH/2, yPos = HEIGHT/2;
     Uint64 frameStart = 0;
@@ -35,27 +35,35 @@ int main() {
 
         SDL_Event event;
         while(SDL_PollEvent(&event)) {
-            xPos = event.motion.x;
-            yPos = event.motion.y;
             switch(event.type) {
                 case SDL_QUIT:
                     user->killUser();
                     running = false; break;
                 default:
-                    postUpdate = user->update(event);
+                    postUpdate = user->handleEvent(event);
                     if(!postUpdate.has_value())
                         {break;}
                     else if(postUpdate.value() == SDLK_ESCAPE) {
                         if(!selectionMenu(renderer, font, drawPause))
                             {beginning = true; break;}
                     }
+                    else if(postUpdate.value() == SDLK_SPACE) {
+                        user->fireProjectile();
+                    }
             }
         }
         SDL_SetRenderDrawColor(renderer,0,0,0,0);
         SDL_RenderClear(renderer);
 
+        user->updateMovement();
+        int mouseX, mouseY;
+        SDL_GetMouseState(&mouseX, &mouseY);
+        user->updateDirection(mouseX, mouseY);
+        user->updateProjectiles(enemyList);
+
         drawRoom(renderer, atlas, "dirt", "");
         user->draw(renderer);
+        user->drawProjectiles(renderer);
         gameOver = updateDrawEnemy(renderer, enemyList, user);
 
         SDL_RenderPresent(renderer);

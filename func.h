@@ -31,6 +31,11 @@ std::unordered_map<std::string, SDL_Rect> sprites =
     {
         {"dirt",{1,1,30,30}}
     };
+struct Projectile {
+  double x,y;
+  double velX, velY;
+  double speed = 5.0;  
+};
 
 /********************************
 *       Core Functionality      *
@@ -41,7 +46,7 @@ bool updateDrawEnemy(SDL_Renderer* renderer, std::vector<std::shared_ptr<enemyTy
     bool gameOver = false;
     for(auto en = enemyList.begin(); en != enemyList.end(); ++en)
     {
-        (*en)->update(player->left(), player->top());
+        (*en)->update(player->left()+15, player->top()+15, enemyList);
         if(!(*en)->isItAlive())
         {
             en = enemyList.erase(en);
