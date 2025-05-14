@@ -41,7 +41,7 @@ bool updateDrawEnemy(SDL_Renderer* renderer, std::vector<std::shared_ptr<enemyTy
     bool gameOver = false;
     for(auto en = enemyList.begin(); en != enemyList.end(); ++en)
     {
-        (*en)->update();
+        (*en)->update(player->left(), player->top());
         if(!(*en)->isItAlive())
         {
             en = enemyList.erase(en);

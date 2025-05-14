@@ -6,7 +6,7 @@ class enemy { // Object used to generate enemies
         enemy(std::vector<std::shared_ptr<enemy>>);
         double top(), bottom(), left(), right();
         bool damage(std::string), isItAlive();
-        void draw(SDL_Renderer*), update();
+        void draw(SDL_Renderer*), update(double,double);
         std::string element;
 
     private:
@@ -41,8 +41,19 @@ void enemy::draw(SDL_Renderer* renderer) {
     SDL_RenderFillRect(renderer, &location);
 }
 
-void enemy::update() {
-    //Do nothing because we need some pathfinding algorithm
+void enemy::update(double userX, double userY) {
+    double xVec = userX - xCoord;
+    double yVec = userY - yCoord;
+
+    double distance = std::sqrt(xVec * xVec + yVec * yVec);
+
+    if(distance > 1.0) {
+        xVec /= distance;
+        yVec /= distance;
+
+        xCoord += xVec * velocity * 0.066;
+        yCoord += yVec * velocity * 0.066;
+    }
 }
 
 #endif
