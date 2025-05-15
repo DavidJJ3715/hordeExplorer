@@ -14,6 +14,7 @@ class player { // The player object that the user is controlling
         void updateProjectiles(std::vector<std::shared_ptr<enemy>>&), drawProjectiles(SDL_Renderer*);
         void cycleAttackType(), drawAttackHUD(SDL_Renderer*, TTF_Font*);
         std::optional<SDL_KeyCode> handleEvent(const SDL_Event&);
+        int fireCoolDown = 0;
 
     private:
         double xCoord = 500, yCoord = 250, velocity = 2, health = 100, facingAngle = 0.0;
@@ -21,7 +22,7 @@ class player { // The player object that the user is controlling
         std::vector<Projectile> projectiles;
         int invincibilityTimer = 0;
         TrackDamage* tracker;
-        std::string currentAttackType = "physical";
+        std::string currentAttackType = "Physical";
 };
 
 player::player(SDL_Renderer* renderer, TrackDamage* dTracker) {
@@ -47,12 +48,12 @@ void player::grantInvincibility() {
 }
 
 void player::cycleAttackType() {
-    if(currentAttackType == "physical")
-        {currentAttackType = "magic";}
-    else if(currentAttackType == "magic")
-        {currentAttackType = "elemental";}
-    else if(currentAttackType == "elemental")
-        {currentAttackType = "physical";}
+    if(currentAttackType == "Physical")
+        {currentAttackType = "Magic";}
+    else if(currentAttackType == "Magic")
+        {currentAttackType = "Elemental";}
+    else if(currentAttackType == "Elemental")
+        {currentAttackType = "Physical";}
 }
 
 void player::setPosition() {
@@ -167,7 +168,13 @@ void player::updateProjectiles(std::vector<std::shared_ptr<enemy>>& enemyList) {
 }
 
 void player::drawProjectiles(SDL_Renderer* renderer) {
-    SDL_SetRenderDrawColor(renderer, 255, 255, 0, 255);
+    if(currentAttackType == "Physical")
+        {SDL_SetRenderDrawColor(renderer,255,100,100,255);}
+    else if(currentAttackType == "Magic")
+        {SDL_SetRenderDrawColor(renderer,100,100,255,255);}
+    else
+        {SDL_SetRenderDrawColor(renderer,100,255,100,255);}
+
     for (const auto& p : projectiles) {
         SDL_Rect bullet = {int(p.x-5),int(p.y-5),10,10};
         SDL_RenderFillRect(renderer, &bullet);

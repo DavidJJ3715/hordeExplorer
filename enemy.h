@@ -34,7 +34,7 @@ bool enemy::isItAlive() {return isAlive;}
 bool enemy::damage(std::string type) {
     double damageRate = 10.0;
     if(element == type)
-        {damageRate * 0.5;}
+        {damageRate *= 0.5;}
     health -= damageRate;
 
     if(health <= 0 && !hasExploded) { 
@@ -62,11 +62,11 @@ void enemy::updateParticles() {
 void enemy::draw(SDL_Renderer* renderer) {
     if(isAlive) {
         SDL_Color resistance = {190,190,190,255};
-        if(element == "physical")
+        if(element == "Physical")
             {resistance = {255,100,100,255};}
-        else if(element == "magic")
+        else if(element == "Magic")
             {resistance = {100,100,255,255};}
-        else if(element == "elemental")
+        else if(element == "Elemental")
             {resistance = {100,255,100,255};}
 
         SDL_SetRenderDrawColor(renderer,resistance.r,resistance.g,resistance.b,resistance.a);

@@ -47,15 +47,16 @@ int main() {
                         if(!selectionMenu(renderer, font, drawPause))
                             {beginning = true; break;}
                     }
-                    else if(postUpdate.value() == SDLK_SPACE) {
-                        user->fireProjectile();
-                    }
             }
         }
         SDL_SetRenderDrawColor(renderer,0,0,0,0);
         SDL_RenderClear(renderer);
 
         user->updateMovement();
+        const Uint8* keystates = SDL_GetKeyboardState(NULL);
+        if(keystates[SDL_SCANCODE_SPACE] && user->fireCoolDown <= 0)
+            {user->fireProjectile(); user->fireCoolDown = 7;}
+        user->fireCoolDown--;
         int mouseX, mouseY;
         SDL_GetMouseState(&mouseX, &mouseY);
         user->updateDirection(mouseX, mouseY);

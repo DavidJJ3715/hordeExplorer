@@ -35,7 +35,7 @@ struct Projectile {
   double x,y;
   double velX, velY;
   double speed = 5.0;
-  std::string type = "physical";
+  std::string type = "Physical";
 };
 
 struct Particle {
@@ -48,11 +48,11 @@ struct TrackDamage {
     double physical = 0.0, magic = 0.0, elemental = 0.0;
 
     void record(std::string type, double amount) {
-        if(type == "physical") 
+        if(type == "Physical") 
             {physical += amount;}
-        else if(type == "magic")
+        else if(type == "Magic")
             {magic += amount;}
-        else if(type == "elemental")
+        else if(type == "Elemental")
             {elemental += amount;}
     }
 
@@ -99,18 +99,18 @@ std::string selectionResistance(const TrackDamage& tracker) {
     double elementalRatio = tracker.elemental / total;
     double rnjesus = static_cast<double>(rand()) / RAND_MAX;
 
-    if(rnjesus > 0.15) {
+    if(rnjesus > 0.125) { //Adjusts how much the AI learns. This means 12.5% of the enemies will be random
         double selection = static_cast<double>(rand()) / RAND_MAX;
         if(selection < physicalRatio)
-            {return "physical";}
+            {return "Physical";}
         else if(selection < physicalRatio + magicRatio)
-            {return "magic";}
+            {return "Magic";}
         else
-            {return "elemental";}
+            {return "Elemental";}
     }
     else {
         int random = rand() % 3;
-        return (random==0) ? "physical" : (random==1) ? "magic" : "elemental";
+        return (random==0) ? "Physical" : (random==1) ? "Magic" : "Elemental";
     }
 }
 
