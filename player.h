@@ -12,6 +12,7 @@ class player { // The player object that the user is controlling
         void draw(SDL_Renderer*), updateMovement(), updateDirection(int,int), fireProjectile();
         void createSolidTexture(SDL_Renderer*, SDL_Color), setPosition(), grantInvincibility();
         void updateProjectiles(std::vector<std::shared_ptr<enemy>>&), drawProjectiles(SDL_Renderer*);
+        void cycleAttackType(), drawAttackHUD(SDL_Renderer*, TTF_Font*);
         std::optional<SDL_KeyCode> handleEvent(const SDL_Event&);
 
     private:
@@ -20,6 +21,7 @@ class player { // The player object that the user is controlling
         std::vector<Projectile> projectiles;
         int invincibilityTimer = 0;
         TrackDamage* tracker;
+        std::string currentAttackType = "physical";
 };
 
 player::player(SDL_Renderer* renderer, TrackDamage* dTracker) {
@@ -42,6 +44,15 @@ void player::revive()       {health = 3;}
 
 void player::grantInvincibility() {
     invincibilityTimer = 200;
+}
+
+void player::cycleAttackType() {
+    if(currentAttackType == "physical")
+        {currentAttackType = "magic";}
+    else if(currentAttackType == "magic")
+        {currentAttackType = "elemental";}
+    else if(currentAttackType == "elemental")
+        {currentAttackType = "physical";}
 }
 
 void player::setPosition() {
@@ -69,6 +80,20 @@ void player::draw(SDL_Renderer* renderer) {
     SDL_Rect rect = {int(xCoord),int(yCoord),30,30};
     SDL_Point center = {15,15};
     SDL_RenderCopyEx(renderer, playerTexture, NULL, &rect, facingAngle, &center, SDL_FLIP_NONE);
+}
+
+void player::drawAttackHUD(SDL_Renderer* renderer, TTF_Font* font) {
+    SDL_Color color = {255,255,255,255};
+    std::string text = "Attack: " + currentAttackType;
+
+    SDL_Surface* textSurface = TTF_RenderText_Solid(font, text.c_str(), color);
+    SDL_Texture* textTexture = SDL_CreateTextureFromSurface(renderer, textSurface);
+    SDL_FreeSurface(textSurface);
+
+    SDL_Rect rect = {20,20,0,0};
+    SDL_QueryTexture(textTexture, NULL, NULL, &rect.w, &rect.h);
+    SDL_RenderCopy(renderer, textTexture, NULL, &rect);
+    SDL_DestroyTexture(textTexture);
 }
 
 void player::updateMovement() {
@@ -104,7 +129,7 @@ void player::fireProjectile() {
     p.x = xCoord+15; p.y = yCoord+15;
     p.velX = std::cos(radAngle) * p.speed;
     p.velY = std::sin(radAngle) * p.speed;
-
+    p.type = currentAttackType;
     projectiles.push_back(p);
 }
 
@@ -124,9 +149,9 @@ void player::updateProjectiles(std::vector<std::shared_ptr<enemy>>& enemyList) {
             if (p.x >= e->left() && p.x <= e->right() &&
                 p.y >= e->top()  && p.y <= e->bottom()) {
 
-                bool killed = e->damage("physical");
+                bool killed = e->damage(p.type);
                 if(tracker) 
-                    {tracker->record("physical", 10.0);}
+                    {tracker->record(p.type, 10.0);}
 
                 it = projectiles.erase(it);
             } 
@@ -177,6 +202,7 @@ std::optional<SDL_KeyCode> player::handleEvent(const SDL_Event &event) {
         switch(event.key.keysym.sym) {
             case SDLK_ESCAPE:   return SDLK_ESCAPE;
             case SDLK_SPACE:    return SDLK_SPACE; //Fire projectile
+            case SDLK_TAB:      cycleAttackType(); break;
         }
     }
     return std::nullopt;

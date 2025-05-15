@@ -34,7 +34,8 @@ std::unordered_map<std::string, SDL_Rect> sprites =
 struct Projectile {
   double x,y;
   double velX, velY;
-  double speed = 5.0;  
+  double speed = 5.0;
+  std::string type = "physical";
 };
 
 struct Particle {
@@ -90,20 +91,27 @@ bool updateDrawEnemy(SDL_Renderer* renderer, std::vector<std::shared_ptr<enemyTy
 
 std::string selectionResistance(const TrackDamage& tracker) {
     double total = tracker.physical + tracker.magic + tracker.elemental;
-    if(total == 0)
+    if(total == 0) 
         {return "none";}
     
     double physicalRatio = tracker.physical / total;
     double magicRatio = tracker.magic / total;
     double elementalRatio = tracker.elemental / total;
-    double random = static_cast<double>(rand()) / RAND_MAX;
+    double rnjesus = static_cast<double>(rand()) / RAND_MAX;
 
-    if(random < physicalRatio)
-        {return "physical";}
-    else if(random < physicalRatio + magicRatio)
-        {return "magic";}
-    else
-        {return "elemental";}
+    if(rnjesus > 0.15) {
+        double selection = static_cast<double>(rand()) / RAND_MAX;
+        if(selection < physicalRatio)
+            {return "physical";}
+        else if(selection < physicalRatio + magicRatio)
+            {return "magic";}
+        else
+            {return "elemental";}
+    }
+    else {
+        int random = rand() % 3;
+        return (random==0) ? "physical" : (random==1) ? "magic" : "elemental";
+    }
 }
 
 template<typename enemyType>

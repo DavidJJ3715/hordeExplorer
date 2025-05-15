@@ -62,6 +62,7 @@ int main() {
         user->updateProjectiles(enemyList);
 
         drawRoom(renderer, atlas, "dirt", "");
+        user->drawAttackHUD(renderer, font);
         user->draw(renderer);
         user->drawProjectiles(renderer);
         gameOver = updateDrawEnemy(renderer, enemyList, user);
