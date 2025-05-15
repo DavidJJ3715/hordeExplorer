@@ -12,11 +12,11 @@ int main() {
     TTF_Font* font = TTF_OpenFont("DejaVuSans.ttf", 75);
     std::optional<SDL_KeyCode> postUpdate;
     
+    TrackDamage damageTracker;
     std::vector<std::shared_ptr<enemy>> enemyList;
-    for(int i=0; i<3; ++i) {
-        enemyList.emplace_back(std::make_shared<enemy>(enemyList));
-    }
-    std::shared_ptr<player> user(new player(renderer));
+    startNewLevel(enemyList, 3, &damageTracker);
+
+    std::shared_ptr<player> user(new player(renderer, &damageTracker));
 
     int frameTime = 0, xPos = WIDTH/2, yPos = HEIGHT/2, level = 1;
     Uint64 frameStart = 0;
@@ -74,8 +74,8 @@ int main() {
             user->setPosition();
             user->grantInvincibility();
             int newEnemyCount = 3 + level;
-            for(int i=0; i<newEnemyCount; ++i) 
-                {enemyList.emplace_back(std::make_shared<enemy>(enemyList));}
+            startNewLevel(enemyList, newEnemyCount, &damageTracker);
+            damageTracker.reset();
         }
 
         SDL_RenderPresent(renderer);

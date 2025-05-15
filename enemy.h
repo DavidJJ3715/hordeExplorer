@@ -32,22 +32,15 @@ double enemy::right()   {return xCoord+30;}
 
 bool enemy::isItAlive() {return isAlive;}
 bool enemy::damage(std::string type) {
-    health -= 10;
-    if(health <= 0 && !hasExploded) { //Enemy is dead, explode into cool particles
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<double> angle(0,2*M_PI);
-        std::uniform_real_distribution<double> speed(2,5);
+    double damageRate = 10.0;
+    if(element == type)
+        {damageRate * 0.5;}
+    health -= damageRate;
 
-        for(int i=0; i<20; ++i) {
-            double ang = angle(gen);
-            double spd = speed(gen);
-
-            particles.push_back({xCoord+15, yCoord+15, std::cos(ang)*spd, std::sin(ang)*spd, 255});
-        }
+    if(health <= 0 && !hasExploded) { 
         hasExploded = true;
         isAlive = false;
-        return true;
+        return true; //Enemy is dead
     } 
     return false; //Enemy is not dead
 }
@@ -62,16 +55,22 @@ void enemy::updateParticles() {
             {p.alpha = 0;}
     }
 
-    // Optional: remove fully faded particles (or keep them till level ends)
     particles.erase(std::remove_if(particles.begin(), particles.end(),
         [](const Particle& p) {return p.alpha == 0;}), particles.end());
 }
 
 void enemy::draw(SDL_Renderer* renderer) {
     if(isAlive) {
-        Uint8 colorValue = static_cast<Uint8>(40 + (health / 100.0) * 150); //Health visual. Thanks ChatGPT
+        SDL_Color resistance = {190,190,190,255};
+        if(element == "physical")
+            {resistance = {255,100,100,255};}
+        else if(element == "magic")
+            {resistance = {100,100,255,255};}
+        else if(element == "elemental")
+            {resistance = {100,255,100,255};}
+
+        SDL_SetRenderDrawColor(renderer,resistance.r,resistance.g,resistance.b,resistance.a);
         SDL_Rect location = {int(xCoord), int(yCoord), 30, 30};
-        SDL_SetRenderDrawColor(renderer,colorValue,190,170,255);
         SDL_RenderFillRect(renderer, &location);
     }
     for(auto& p : particles) {
@@ -106,10 +105,8 @@ void enemy::update(double userX, double userY, const std::vector<std::shared_ptr
 
         if(dist < 50.0 && dist > 0.0) {
             double push = (50.0 - dist) / 2.0;
-
             dx /= dist;
             dy /= dist;
-
             xCoord += dx * push;
             yCoord += dy * push;
         }

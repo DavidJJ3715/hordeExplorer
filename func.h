@@ -43,6 +43,22 @@ struct Particle {
     Uint8 alpha;
 };
 
+struct TrackDamage {
+    double physical = 0.0, magic = 0.0, elemental = 0.0;
+
+    void record(std::string type, double amount) {
+        if(type == "physical") 
+            {physical += amount;}
+        else if(type == "magic")
+            {magic += amount;}
+        else if(type == "elemental")
+            {elemental += amount;}
+    }
+
+    void reset() 
+        {physical = 0.0; magic = 0.0; elemental = 0.0;}
+};
+
 /********************************
 *       Core Functionality      *
 *********************************/
@@ -72,6 +88,36 @@ bool updateDrawEnemy(SDL_Renderer* renderer, std::vector<std::shared_ptr<enemyTy
     return gameOver;
 }
 
+std::string selectionResistance(const TrackDamage& tracker) {
+    double total = tracker.physical + tracker.magic + tracker.elemental;
+    if(total == 0)
+        {return "none";}
+    
+    double physicalRatio = tracker.physical / total;
+    double magicRatio = tracker.magic / total;
+    double elementalRatio = tracker.elemental / total;
+    double random = static_cast<double>(rand()) / RAND_MAX;
+
+    if(random < physicalRatio)
+        {return "physical";}
+    else if(random < physicalRatio + magicRatio)
+        {return "magic";}
+    else
+        {return "elemental";}
+}
+
+template<typename enemyType>
+std::shared_ptr<enemyType> spawnAdaptiveEnemy(std::vector<std::shared_ptr<enemyType>>& enemyList, const TrackDamage* tracker) {
+    auto e = std::make_shared<enemyType>(enemyList);
+    e->element = selectionResistance(*tracker);
+    return e;
+}
+
+template<typename enemyType>
+void startNewLevel(std::vector<std::shared_ptr<enemyType>>& enemyList, int numEnemies, TrackDamage* tracker) {
+    for(int i=0; i<numEnemies; ++i)
+        {enemyList.push_back(spawnAdaptiveEnemy(enemyList, tracker));}
+}
 
 /********************************
 *       Draw Functions          *

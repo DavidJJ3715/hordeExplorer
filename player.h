@@ -5,7 +5,7 @@
 
 class player { // The player object that the user is controlling
     public:
-        player(SDL_Renderer*);
+        player(SDL_Renderer*, TrackDamage*);
         double left(), right(), top(), bottom(), getHealth();
         bool isDead(), damage();
         void setX(double), setY(double), killUser(), restart(), revive();
@@ -19,9 +19,11 @@ class player { // The player object that the user is controlling
         SDL_Texture* playerTexture;
         std::vector<Projectile> projectiles;
         int invincibilityTimer = 0;
+        TrackDamage* tracker;
 };
 
-player::player(SDL_Renderer* renderer) {
+player::player(SDL_Renderer* renderer, TrackDamage* dTracker) {
+    tracker = dTracker;
     createSolidTexture(renderer, {200,80,50,255});
 }
 
@@ -123,9 +125,8 @@ void player::updateProjectiles(std::vector<std::shared_ptr<enemy>>& enemyList) {
                 p.y >= e->top()  && p.y <= e->bottom()) {
 
                 bool killed = e->damage("physical");
-                if(killed) {
-                    // Maybe spawn particles, increase score, etc.
-                }
+                if(tracker) 
+                    {tracker->record("physical", 10.0);}
 
                 it = projectiles.erase(it);
             } 
