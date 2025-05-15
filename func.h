@@ -50,22 +50,28 @@ template<typename enemyType, typename userType>
 bool updateDrawEnemy(SDL_Renderer* renderer, std::vector<std::shared_ptr<enemyType>>& enemyList, std::shared_ptr<userType>& player)
 {
     bool gameOver = false;
-    for(auto en = enemyList.begin(); en != enemyList.end(); ++en)
-    {
+    for(auto en = enemyList.begin(); en != enemyList.end(); ) {
         (*en)->update(player->left()+15, player->top()+15, enemyList);
+
         if(!(*en)->isItAlive())
-        {
-            en = enemyList.erase(en);
-            --en;
-            player->damage();
-            if(player->isDead())
-                {gameOver = true;}
+            {en = enemyList.erase(en);}
+        else {
+            (*en)->draw(renderer);
+            ++en;
         }
-        else
-            {(*en)->draw(renderer);}
+    }
+
+    for (auto& e : enemyList) {
+        bool touchingPlayer = !(e->right() < player->left() || e->left() > player->right() || e->bottom() < player->top() || e->top() > player->bottom());
+
+        if (touchingPlayer) {
+            if(player->damage()) 
+                {gameOver = true; break;}
+        }
     }
     return gameOver;
 }
+
 
 /********************************
 *       Draw Functions          *

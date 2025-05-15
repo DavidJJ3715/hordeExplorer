@@ -7,17 +7,18 @@ class player { // The player object that the user is controlling
     public:
         player(SDL_Renderer*);
         double left(), right(), top(), bottom(), getHealth();
-        bool isDead();
-        void setX(double), setY(double), killUser(), damage(), restart(), revive();
+        bool isDead(), damage();
+        void setX(double), setY(double), killUser(), restart(), revive();
         void draw(SDL_Renderer*), updateMovement(), updateDirection(int,int), fireProjectile();
-        void createSolidTexture(SDL_Renderer*, SDL_Color);
+        void createSolidTexture(SDL_Renderer*, SDL_Color), setPosition(), grantInvincibility();
         void updateProjectiles(std::vector<std::shared_ptr<enemy>>&), drawProjectiles(SDL_Renderer*);
         std::optional<SDL_KeyCode> handleEvent(const SDL_Event&);
 
     private:
-        double xCoord = 500, yCoord = 250, velocity = 2, health = 3, facingAngle = 0.0;
+        double xCoord = 500, yCoord = 250, velocity = 2, health = 100, facingAngle = 0.0;
         SDL_Texture* playerTexture;
         std::vector<Projectile> projectiles;
+        int invincibilityTimer = 0;
 };
 
 player::player(SDL_Renderer* renderer) {
@@ -35,8 +36,20 @@ bool player::isDead()       {return health <= 0;}
 void player::setX(double x) {xCoord = x;}
 void player::setY(double y) {yCoord = y;}
 void player::killUser()     {health = 0;}
-void player::damage()       {health -= 1;}
 void player::revive()       {health = 3;}
+
+void player::grantInvincibility() {
+    invincibilityTimer = 200;
+}
+
+void player::setPosition() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> randX(300, WIDTH-300);
+    std::uniform_int_distribution<int> randY(200, HEIGHT-200);
+    xCoord = (randX(gen));
+    yCoord = (randY(gen));
+}
 
 void player::restart() {
     health = 3;
@@ -45,6 +58,12 @@ void player::restart() {
 }
 
 void player::draw(SDL_Renderer* renderer) {
+    if(invincibilityTimer > 0) {
+        if((invincibilityTimer / 5) % 2 != 0) {
+            return;
+        }
+    }
+
     SDL_Rect rect = {int(xCoord),int(yCoord),30,30};
     SDL_Point center = {15,15};
     SDL_RenderCopyEx(renderer, playerTexture, NULL, &rect, facingAngle, &center, SDL_FLIP_NONE);
@@ -64,6 +83,9 @@ void player::updateMovement() {
 
     if(keystates[SDL_SCANCODE_S] && bottom() <= 620)
         {setY(yCoord + velocity);}
+    
+    if(invincibilityTimer > 0) 
+        {--invincibilityTimer;}
 }
 
 void player::updateDirection(int mouseX, int mouseY) {
@@ -135,6 +157,18 @@ void player::createSolidTexture(SDL_Renderer* renderer, SDL_Color color) {
     SDL_FillRect(surface, NULL, SDL_MapRGBA(surface->format, color.r, color.g, color.b, color.a));
     playerTexture = SDL_CreateTextureFromSurface(renderer, surface);
     SDL_FreeSurface(surface);
+}
+
+bool player::damage() {
+    if(invincibilityTimer > 0) {
+        return false;
+    }
+    --health;
+    invincibilityTimer = 100;
+    if(health <= 0) {
+        return true;
+    }
+    return false;
 }
 
 std::optional<SDL_KeyCode> player::handleEvent(const SDL_Event &event) {

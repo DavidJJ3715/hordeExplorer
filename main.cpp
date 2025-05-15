@@ -69,6 +69,15 @@ int main() {
             e->updateParticles();
         }
 
+        if(enemyList.empty()) {
+            level++;
+            user->setPosition();
+            user->grantInvincibility();
+            int newEnemyCount = 3 + level;
+            for(int i=0; i<newEnemyCount; ++i) 
+                {enemyList.emplace_back(std::make_shared<enemy>(enemyList));}
+        }
+
         SDL_RenderPresent(renderer);
         frameTime = SDL_GetTicks64() - frameStart;
         if(frameDelay > frameTime) {
